@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.ListView;
 import com.getpebble.android.kit.PebbleKit;
+import com.google.gson.Gson;
 import com.helm108.swimcounterandroid.R;
 import com.helm108.swimcounterandroid.adapters.SwimListHashmapAdapter;
 import com.helm108.swimcounterandroid.controllers.SwimSessions;
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
 
   private void getStoredSessions() {
+    System.out.println("Get Stored Sessions");
     try {
       FileInputStream fis = openFileInput(FILENAME);
       int c;
@@ -35,16 +37,24 @@ public class MainActivity extends AppCompatActivity {
       while ((c = fis.read()) != -1) {
         json = json + Character.toString((char) c);
       }
-      swimSessions.fromJSON(json);
 
       fis.close();
+
+
+      Gson gson = new Gson();
+
+      swimSessions = gson.fromJson(json, SwimSessions.class);
+      System.out.println("Loading");
     }
     catch (IOException e) {
       System.out.println(e);
     }
   }
 
-  private void setStoredSessions(String json) {
+  private void setStoredSessions() {
+    Gson gson = new Gson();
+    String json = gson.toJson(swimSessions);
+
     try {
       FileOutputStream fos = openFileOutput(FILENAME, Context.MODE_PRIVATE);
       fos.write(json.getBytes());
@@ -100,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Update list.
         updateAdapter();
-        setStoredSessions(swimSessions.toJSON());
+        setStoredSessions();
       }
     };
 
@@ -108,5 +118,3 @@ public class MainActivity extends AppCompatActivity {
     PebbleKit.registerDataLogReceiver(getApplicationContext(), dataLogReceiver);
   }
 }
-
-// d4e341fd-c6f6-42d6-bf91-808ba7a92e8c
